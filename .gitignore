@@ -1,10 +1,6 @@
 # AutoHotkey generated files
 *.ahk.log
 
-# Compiled AHK scripts (source .ahk is the canonical version)
-/demo.exe
-/shutdown.exe
-
 # Windows
 Thumbs.db
 Desktop.ini
