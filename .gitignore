@@ -1,0 +1,12 @@
+# AutoHotkey generated files
+*.ahk.log
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editor
+*.swp
+*.swo
+*~
+.DS_Store
