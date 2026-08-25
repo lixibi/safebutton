@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MicroOri</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <div>
+        <h1 data-i18n="brandTitle">MicroOri Remapper</h1>
+        <p class="sub" data-i18n="brandSub">Knob D9 · Button D4 · Config saved to board</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" class="lang-btn active" data-lang="en">EN</button>
+        <button type="button" class="lang-btn" data-lang="zh">中文</button>
+        <button type="button" class="lang-btn" data-lang="ja">日本語</button>
+      </div>
+      <div id="statusPill" class="pill pill-off" data-i18n="disconnected">Disconnected</div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel connect-panel">
+      <h2 data-i18n="connect">Connection</h2>
+      <div class="row">
+        <select id="portSelect"></select>
+        <button id="refreshBtn" class="btn ghost" title="Refresh" data-i18n="refresh">Refresh</button>
+        <button id="autoBtn" class="btn" data-i18n="autoConnect">Auto Connect</button>
+      </div>
+      <div id="portInfo" class="muted"></div>
+    </section>
+
+    <section class="map-area">
+      <div id="knobCard" class="map-card">
+        <div class="map-head">
+          <span class="map-label" data-i18n="knob">Knob</span>
+          <span class="map-pin">D9</span>
+        </div>
+        <select id="knobSelect" class="key-select"></select>
+        <div class="map-foot" data-i18n="hold">Hold = key held</div>
+      </div>
+
+      <div id="buttonCard" class="map-card">
+        <div class="map-head">
+          <span class="map-label" data-i18n="button">Button</span>
+          <span class="map-pin">D4</span>
+        </div>
+        <select id="buttonSelect" class="key-select"></select>
+        <div class="map-foot" data-i18n="hold">Hold = key held</div>
+      </div>
+    </section>
+
+    <section class="panel actions-panel">
+      <button id="saveBtn" class="btn primary" data-i18n="save">Save to Board</button>
+      <button id="resetBtn" class="btn ghost" data-i18n="reset">Restore Default</button>
+      <button id="disconnectBtn" class="btn ghost" data-i18n="disconnect">Disconnect</button>
+      <div id="saveMsg" class="muted"></div>
+    </section>
+
+    <section class="panel log-panel">
+      <h2 data-i18n="log">Debug Log</h2>
+      <div id="log" class="log"></div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

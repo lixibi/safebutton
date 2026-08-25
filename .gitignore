@@ -1,12 +1,8 @@
-# AutoHotkey generated files
-*.ahk.log
+# Runtime state
+microori.json
+*.log
 
 # Windows
 Thumbs.db
 Desktop.ini
 
-# Editor
-*.swp
-*.swo
-*~
-.DS_Store
