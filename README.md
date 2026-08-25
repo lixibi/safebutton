@@ -48,7 +48,7 @@ AutoHotkey required at runtime.
 
 ![Host Software](docs/host-screenshot.png)
 
-![Hardware Photo](docs/hardware.jpg)
+
 
 ---
 
