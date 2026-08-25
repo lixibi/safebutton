@@ -41,6 +41,11 @@ console, and no extra runtime installation are needed.
 
 ![Host Software](docs/host-screenshot.png)
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> origin/plus
 ---
 
 ## Features
