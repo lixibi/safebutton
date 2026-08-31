@@ -36,6 +36,9 @@ func init() {
 	}
 	validKeys["FAV"] = true
 	validKeys["SEARCH"] = true
+	for _, key := range []string{"LCTRL", "RCTRL", "LSHIFT", "RSHIFT", "LALT", "RALT", "LWIN", "RWIN", "KC_PWR"} {
+		validKeys[key] = true
+	}
 	for c := 'A'; c <= 'Z'; c++ {
 		validKeys[string(c)] = true
 	}
@@ -436,6 +439,16 @@ func main() {
 		map[string]string{"value": "FAV", "label": "浏览器收藏", "group": "浏览器"},
 		map[string]string{"value": "SEARCH", "label": "浏览器搜索", "group": "浏览器"},
 	)
+	modifierKeys := []struct{ value, label string }{
+		{"LCTRL", "Left Ctrl"}, {"RCTRL", "Right Ctrl"},
+		{"LSHIFT", "Left Shift"}, {"RSHIFT", "Right Shift"},
+		{"LALT", "Left Alt"}, {"RALT", "Right Alt"},
+		{"LWIN", "Left Win"}, {"RWIN", "Right Win"},
+	}
+	for _, key := range modifierKeys {
+		keyOptions = append(keyOptions, map[string]string{"value": key.value, "label": key.label, "group": "Modifiers"})
+	}
+	keyOptions = append(keyOptions, map[string]string{"value": "KC_PWR", "label": "Power Management (KC_PWR)", "group": "System"})
 	for c := 'A'; c <= 'Z'; c++ {
 		keyOptions = append(keyOptions, map[string]string{"value": string(c), "label": string(c), "group": "字母 A-Z"})
 	}

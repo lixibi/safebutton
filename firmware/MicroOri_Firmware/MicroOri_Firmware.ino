@@ -11,6 +11,7 @@
  *   - 两个按钮分别映射一个可配置按键
  *   - 上位机通过 USB 串口(CDC) 读取/修改映射，配置存 EEPROM 持久化
  *   - 支持 F1-F12、浏览器收藏、浏览器搜索、A-Z
+ *   - 支持左右 Ctrl/Shift/Alt/Win，以及 KC_PWR 电源管理键(ACPI)
  *
  * 串口协议(115200, 换行结尾):
  *   PING            -> PONG
@@ -33,7 +34,9 @@ enum KeyId : uint8_t {
   K_SEARCH = 14, // 浏览器搜索 Browser Search
   K_A = 15, K_B, K_C, K_D, K_E, K_F, K_G, K_H, K_I, K_J,
   K_K, K_L, K_M, K_N, K_O, K_P, K_Q, K_R, K_S, K_T,
-  K_U, K_V, K_W, K_X, K_Y, K_Z
+  K_U, K_V, K_W, K_X, K_Y, K_Z,
+  K_LCTRL, K_RCTRL, K_LSHIFT, K_RSHIFT, K_LALT, K_RALT,
+  K_LWIN, K_RWIN, K_PWR
 };
 
 // ---------------- 引脚 ----------------
@@ -88,6 +91,15 @@ const char* keyName(KeyId id) {
     c[0] = 'A' + (id - K_A);
     return c;
   }
+  if (id == K_LCTRL) return "LCTRL";
+  if (id == K_RCTRL) return "RCTRL";
+  if (id == K_LSHIFT) return "LSHIFT";
+  if (id == K_RSHIFT) return "RSHIFT";
+  if (id == K_LALT) return "LALT";
+  if (id == K_RALT) return "RALT";
+  if (id == K_LWIN) return "LWIN";
+  if (id == K_RWIN) return "RWIN";
+  if (id == K_PWR) return "KC_PWR";
   return "NONE";
 }
 
@@ -101,6 +113,15 @@ KeyId keyFromName(const String& name) {
   if (name.length() == 1 && name[0] >= 'A' && name[0] <= 'Z') {
     return (KeyId)(K_A + (name[0] - 'A'));
   }
+  if (name == "LCTRL" || name == "LEFT_CTRL") return K_LCTRL;
+  if (name == "RCTRL" || name == "RIGHT_CTRL") return K_RCTRL;
+  if (name == "LSHIFT" || name == "LEFT_SHIFT") return K_LSHIFT;
+  if (name == "RSHIFT" || name == "RIGHT_SHIFT") return K_RSHIFT;
+  if (name == "LALT" || name == "LEFT_ALT") return K_LALT;
+  if (name == "RALT" || name == "RIGHT_ALT") return K_RALT;
+  if (name == "LWIN" || name == "LEFT_WIN" || name == "LGUI") return K_LWIN;
+  if (name == "RWIN" || name == "RIGHT_WIN" || name == "RGUI") return K_RWIN;
+  if (name == "KC_PWR" || name == "POWER") return K_PWR;
   return K_NONE;
 }
 
@@ -116,6 +137,15 @@ bool keyPress(KeyId id) {
     Keyboard.press((KeyboardKeycode)(0x04 + (id - K_A)));
     return true;
   }
+  if (id == K_LCTRL) { Keyboard.press(KEY_LEFT_CTRL); return true; }
+  if (id == K_RCTRL) { Keyboard.press(KEY_RIGHT_CTRL); return true; }
+  if (id == K_LSHIFT) { Keyboard.press(KEY_LEFT_SHIFT); return true; }
+  if (id == K_RSHIFT) { Keyboard.press(KEY_RIGHT_SHIFT); return true; }
+  if (id == K_LALT) { Keyboard.press(KEY_LEFT_ALT); return true; }
+  if (id == K_RALT) { Keyboard.press(KEY_RIGHT_ALT); return true; }
+  if (id == K_LWIN) { Keyboard.press(KEY_LEFT_GUI); return true; }
+  if (id == K_RWIN) { Keyboard.press(KEY_RIGHT_GUI); return true; }
+  if (id == K_PWR) { System.press(SYSTEM_POWER_DOWN); return true; }
   return false;
 }
 
@@ -130,6 +160,15 @@ bool keyRelease(KeyId id) {
     Keyboard.release((KeyboardKeycode)(0x04 + (id - K_A)));
     return true;
   }
+  if (id == K_LCTRL) { Keyboard.release(KEY_LEFT_CTRL); return true; }
+  if (id == K_RCTRL) { Keyboard.release(KEY_RIGHT_CTRL); return true; }
+  if (id == K_LSHIFT) { Keyboard.release(KEY_LEFT_SHIFT); return true; }
+  if (id == K_RSHIFT) { Keyboard.release(KEY_RIGHT_SHIFT); return true; }
+  if (id == K_LALT) { Keyboard.release(KEY_LEFT_ALT); return true; }
+  if (id == K_RALT) { Keyboard.release(KEY_RIGHT_ALT); return true; }
+  if (id == K_LWIN) { Keyboard.release(KEY_LEFT_GUI); return true; }
+  if (id == K_RWIN) { Keyboard.release(KEY_RIGHT_GUI); return true; }
+  if (id == K_PWR) { System.release(); return true; }
   return false;
 }
 
@@ -150,8 +189,8 @@ void loadConfig() {
     saveConfig();
   }
   // 防止损坏数据
-  if (knobKey > K_Z) knobKey = K_NONE;
-  if (buttonKey > K_Z) buttonKey = K_NONE;
+  if (knobKey > K_PWR) knobKey = K_NONE;
+  if (buttonKey > K_PWR) buttonKey = K_NONE;
 }
 
 void sendMap() {
@@ -260,6 +299,7 @@ void setup() {
 
   Keyboard.begin();
   Consumer.begin();
+  System.begin();
   Serial.begin(115200);
 
   loadConfig();
