@@ -14,13 +14,14 @@ import (
 	"sync"
 	"time"
 
+	webview2 "github.com/jchv/go-webview2"
 	"go.bug.st/serial"
 	"go.bug.st/serial/enumerator"
-	webview2 "github.com/jchv/go-webview2"
 	"golang.org/x/sys/windows"
 )
 
 const (
+	appVersion    = "3KEY-1.0.0"
 	baud          = 115200
 	readTimeout   = 300 * time.Millisecond
 	handshakeTO   = 6 * time.Second
@@ -96,6 +97,7 @@ func isCandidate(p PortInfo) bool {
 type Mapping struct {
 	Knob   string `json:"knob"`
 	Button string `json:"button"`
+	Knob2  string `json:"knob2"`
 }
 
 type App struct {
@@ -281,6 +283,10 @@ func (a *App) onLine(line string, pongCh chan struct{}) {
 		a.mu.Lock()
 		a.mapping.Button = strings.TrimSpace(strings.TrimPrefix(line, "MAP button "))
 		a.mu.Unlock()
+	case strings.HasPrefix(line, "MAP knob2 "):
+		a.mu.Lock()
+		a.mapping.Knob2 = strings.TrimSpace(strings.TrimPrefix(line, "MAP knob2 "))
+		a.mu.Unlock()
 	}
 	a.appendLog("<< %s", line)
 }
@@ -311,6 +317,9 @@ func (a *App) setMapping(m Mapping) error {
 	if !validKeys[m.Button] {
 		return fmt.Errorf("无效按键: %s", m.Button)
 	}
+	if !validKeys[m.Knob2] {
+		return fmt.Errorf("无效按键: %s", m.Knob2)
+	}
 	if err := a.writeLine("SET knob " + m.Knob); err != nil {
 		return err
 	}
@@ -318,11 +327,15 @@ func (a *App) setMapping(m Mapping) error {
 	if err := a.writeLine("SET button " + m.Button); err != nil {
 		return err
 	}
+	time.Sleep(80 * time.Millisecond)
+	if err := a.writeLine("SET knob2 " + m.Knob2); err != nil {
+		return err
+	}
 	time.Sleep(150 * time.Millisecond)
 	a.mu.Lock()
 	a.mapping = m
 	a.mu.Unlock()
-	a.appendLog("映射已保存到板子: 旋钮=%s 按钮=%s", m.Knob, m.Button)
+	a.appendLog("映射已保存到板子: 旋钮1=%s 按钮=%s 旋钮2=%s", m.Knob, m.Button, m.Knob2)
 	return nil
 }
 
@@ -428,7 +441,7 @@ func jsonBody(w http.ResponseWriter, r *http.Request, v interface{}) bool {
 }
 
 func main() {
-	app := &App{mapping: Mapping{Knob: "F8", Button: "F9"}}
+	app := &App{mapping: Mapping{Knob: "F8", Button: "F9", Knob2: "F10"}}
 
 	keyOptions := []map[string]string{}
 	for i := 1; i <= 12; i++ {
@@ -458,6 +471,7 @@ func main() {
 		defer app.mu.Unlock()
 		writeJSON(w, map[string]interface{}{
 			"ok":        true,
+			"version":   appVersion,
 			"connected": app.connected,
 			"port":      app.portName,
 			"mapping":   app.mapping,
@@ -466,7 +480,7 @@ func main() {
 	})
 
 	http.HandleFunc("/api/options", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, map[string]interface{}{"ok": true, "options": keyOptions})
+		writeJSON(w, map[string]interface{}{"ok": true, "version": appVersion, "options": keyOptions})
 	})
 
 	http.HandleFunc("/api/ports", func(w http.ResponseWriter, r *http.Request) {

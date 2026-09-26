@@ -53,13 +53,12 @@ VERIFICATION_CONFIRMATION:
 
 -->
 
-# SafeButton Plus — Host Software
+# SafeButton Plus — MicroOri 3-Key v1.0.0
 
-The **SafeButton Plus** Windows host app (`MicroOri.exe`) is a small
-single-window tool for managing a programmable USB button controller. It
-connects over USB serial, reads the key mapping stored on the controller, and
-lets you change, save, or reset it without the Arduino IDE. No browser, no
-console, and no extra runtime installation are needed.
+The **MicroOri 3-Key v1.0.0** Windows host app (`MicroOri.exe`) manages three
+programmable inputs: the original knob on D9, the button on D4, and a new
+second knob on D5. It reads the mappings stored on the controller and lets you
+change, save, or reset all three without the Arduino IDE.
 
 ![Host Software](docs/host-screenshot.png)
 
@@ -70,11 +69,11 @@ console, and no extra runtime installation are needed.
 | # | Capability | Implementation |
 |---|------------|----------------|
 | 1 | Auto-connect | Connects to the last used COM port or detects the controller automatically. |
-| 2 | Read / save mapping | Reads the current mapping from the controller and writes a new one over USB serial. |
+| 2 | Read / save mapping | Reads the current three-key mapping from the controller and writes a new one over USB serial. |
 | 3 | Restore defaults | Resets both inputs to their original presets with one click. |
 | 4 | Refresh / replug support | Refreshes the COM port list after unplugging and plugging the controller back in. |
 | 5 | Debug log | Shows live connection and serial traffic for simple troubleshooting. |
-| 6 | Built-in presets | F1-F12, Browser Favorites, Browser Search, and A-Z are available out of the box. |
+| 6 | Built-in presets | F1-F12, browser keys, A-Z, left/right modifiers, and KC_PWR are available out of the box. |
 | 7 | Random loopback port | The app chooses an available local port every launch, so it cannot conflict with other software. |
 | 8 | Single window, no console | The frontend is embedded in the EXE and opens as one native window. |
 | 9 | Multi-language | Defaults to English and can switch to 中文 or 日本語; the choice is remembered. |
@@ -130,9 +129,10 @@ Double-click `host/MicroOri.exe`. The single window opens directly and will:
 
 ### 2. Change and save a mapping
 
-1. Pick a key for **Knob (D9)**.
+1. Pick a key for **Knob 1 (D9)**.
 2. Pick a key for **Button (D4)**.
-3. Click **Save to Board**.
+3. Pick a key for **Knob 2 (D5)**.
+4. Click **Save to Board**.
 
 The new mapping is written to the controller immediately and stays active after
 unplugging and reconnecting.
@@ -144,6 +144,8 @@ Available preset keys:
 | F1-F12 | `F1` … `F12` |
 | Browser | `FAV` (Browser Favorites), `SEARCH` (Browser Search) |
 | Letters | `A` … `Z` |
+| Modifiers | `LCTRL`, `RCTRL`, `LSHIFT`, `RSHIFT`, `LALT`, `RALT`, `LWIN`, `RWIN` |
+| System | `KC_PWR` (Power Management / ACPI power key) |
 
 ### 3. Switch language
 
@@ -157,12 +159,26 @@ the header. The choice is remembered between launches.
 | Command | Response |
 |---------|----------|
 | `PING` | `PONG` |
-| `GET` | `MAP knob <name>` / `MAP button <name>` / `OK` |
+| `GET` | `MAP knob <name>` / `MAP button <name>` / `MAP knob2 <name>` / `OK` |
 | `SET knob <name>` | `OK` or `ERR <msg>` |
 | `SET button <name>` | `OK` or `ERR <msg>` |
-| `RESET` | `OK` (restores defaults) |
+| `SET knob2 <name>` | `OK` or `ERR <msg>` |
+| `RESET` | `OK` (restores defaults F8 / F9 / F10) |
 
-Names follow the same preset list: `F1`…`F12`, `FAV`, `SEARCH`, `A`…`Z`.
+Names follow the same preset list: `F1`…`F12`, `FAV`, `SEARCH`, `A`…`Z`, modifier names, and `KC_PWR`.
+
+## Wiring
+
+| Input | Pin connection |
+|-------|----------------|
+| Original knob | `D9` → `GND` |
+| Original button | `D4` → `GND` |
+| New knob 2 | `D5` → `GND` |
+| LED 1 | `D6` → `GND` |
+| LED 2 | `D14` → `GND` |
+
+All three inputs use `INPUT_PULLUP`: connecting the pin to common ground means
+pressed. D6 lights for any of the three inputs; D14 continues to follow D4.
 
 ---
 

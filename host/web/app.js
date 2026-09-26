@@ -3,12 +3,12 @@ const $ = (id) => document.getElementById(id);
 let options = [];
 let userEdited = false;
 let lang = localStorage.getItem("microori-lang") || "en";
-let lastMapping = { knob: "F8", button: "F9" };
+let lastMapping = { knob: "F8", button: "F9", knob2: "F10" };
 
 const STRINGS = {
   en: {
     brandTitle: "MicroOri Remapper",
-    brandSub: "Knob D9 · Button D4 · Config saved to board",
+    brandSub: "3-Key v1.0.0 · D9 / D4 / D5 · Config saved to board",
     disconnected: "Disconnected",
     connect: "Connection",
     refresh: "Refresh",
@@ -18,6 +18,7 @@ const STRINGS = {
     portsCount: (n) => `${n} USB serial port(s) available. Replug and refresh to detect.`,
     knob: "Knob",
     button: "Button",
+    knob2: "Knob 2",
     hold: "Hold = key held",
     save: "Save to Board",
     reset: "Restore Default",
@@ -25,7 +26,7 @@ const STRINGS = {
     saved: "Saved to board",
     autoConnected: "Auto connected",
     disconnectedMsg: "Disconnected",
-    resetOk: "Restored defaults F8 / F9",
+    resetOk: "Restored defaults F8 / F9 / F10",
     connectedPort: (p) => `Connected · ${p}`,
     log: "Debug Log",
     browserGroup: "Browser",
@@ -35,7 +36,7 @@ const STRINGS = {
   },
   zh: {
     brandTitle: "MicroOri 改键上位机",
-    brandSub: "旋钮 D9 · 按钮 D4 · 配置直存板子",
+    brandSub: "三键版 v1.0.0 · D9 / D4 / D5 · 配置直存板子",
     disconnected: "未连接",
     connect: "连接",
     refresh: "刷新",
@@ -45,6 +46,7 @@ const STRINGS = {
     portsCount: (n) => `${n} 个 USB 串口可用，拔插后可点刷新识别。`,
     knob: "旋钮",
     button: "按钮",
+    knob2: "旋钮 2",
     hold: "按住 = 持续按键",
     save: "保存到板子",
     reset: "恢复默认",
@@ -52,7 +54,7 @@ const STRINGS = {
     saved: "已保存到板子",
     autoConnected: "已自动连接",
     disconnectedMsg: "已断开",
-    resetOk: "已恢复默认 F8 / F9",
+    resetOk: "已恢复默认 F8 / F9 / F10",
     connectedPort: (p) => `已连接 · ${p}`,
     log: "调试日志",
     browserGroup: "浏览器",
@@ -62,7 +64,7 @@ const STRINGS = {
   },
   ja: {
     brandTitle: "MicroOri キー設定",
-    brandSub: "ノブ D9 · ボタン D4 · 設定は基板に保存",
+    brandSub: "3キー版 v1.0.0 · D9 / D4 / D5 · 設定は基板に保存",
     disconnected: "未接続",
     connect: "接続",
     refresh: "更新",
@@ -72,6 +74,7 @@ const STRINGS = {
     portsCount: (n) => `${n} 個のUSBシリアルポート。抜き差し後に更新で認識されます。`,
     knob: "ノブ",
     button: "ボタン",
+    knob2: "ノブ 2",
     hold: "押し続け = キー長押し",
     save: "基板に保存",
     reset: "初期状態に戻す",
@@ -79,7 +82,7 @@ const STRINGS = {
     saved: "基板に保存しました",
     autoConnected: "自動接続しました",
     disconnectedMsg: "切断しました",
-    resetOk: "初期値 F8 / F9 に戻しました",
+    resetOk: "初期値 F8 / F9 / F10 に戻しました",
     connectedPort: (p) => `接続済み · ${p}`,
     log: "デバッグログ",
     browserGroup: "ブラウザ",
@@ -94,6 +97,7 @@ const EN_RULES = [
   [/^握手成功，读取当前映射$/, () => "Handshake OK, reading current mapping"],
   [/^连接断开: (.+)$/, (m) => `Disconnected: ${m[1]}`],
   [/^映射已保存到板子: 旋钮=(.+?) 按钮=(.+?)$/, (m) => `Saved to board: knob=${m[1]} button=${m[2]}`],
+  [/^映射已保存到板子: 旋钮1=(.+?) 按钮=(.+?) 旋钮2=(.+?)$/, (m) => `Saved to board: knob 1=${m[1]} button=${m[2]} knob 2=${m[3]}`],
   [/^自动连接 (.+?) 失败: (.+)$/, (m) => `Auto-connect ${m[1]} failed: ${m[2]}`],
   [/^端口读取失败: (.+)$/, (m) => `Port read failed: ${m[1]}`],
   [/^打开 (.+?) 失败: (.+)$/, (m) => `Failed to open ${m[1]}: ${m[2]}`],
@@ -106,6 +110,7 @@ const JA_RULES = [
   [/^握手成功，读取当前映射$/, () => "ハンドシェイク成功、現在のマッピングを読み取り中"],
   [/^连接断开: (.+)$/, (m) => `切断: ${m[1]}`],
   [/^映射已保存到板子: 旋钮=(.+?) 按钮=(.+?)$/, (m) => `基板に保存: ノブ=${m[1]} ボタン=${m[2]}`],
+  [/^映射已保存到板子: 旋钮1=(.+?) 按钮=(.+?) 旋钮2=(.+?)$/, (m) => `基板に保存: ノブ1=${m[1]} ボタン=${m[2]} ノブ2=${m[3]}`],
   [/^自动连接 (.+?) 失败: (.+)$/, (m) => `自動接続 ${m[1]} 失敗: ${m[2]}`],
   [/^端口读取失败: (.+)$/, (m) => `ポート読み取り失敗: ${m[1]}`],
   [/^打开 (.+?) 失败: (.+)$/, (m) => `${m[1]} を開けませんでした: ${m[2]}`],
@@ -180,6 +185,7 @@ function fillOptions(select, current) {
 function refreshSelects() {
   fillOptions($("knobSelect"), $("knobSelect").value || lastMapping.knob);
   fillOptions($("buttonSelect"), $("buttonSelect").value || lastMapping.button);
+  fillOptions($("knob2Select"), $("knob2Select").value || lastMapping.knob2);
 }
 
 function applyLang() {
@@ -264,6 +270,7 @@ async function pollStatus() {
     if (data.connected && !userEdited) {
       fillOptions($("knobSelect"), data.mapping.knob);
       fillOptions($("buttonSelect"), data.mapping.button);
+      fillOptions($("knob2Select"), data.mapping.knob2);
     }
   }
   if (!data.connected) {
@@ -296,6 +303,7 @@ async function init() {
   });
   $("knobSelect").addEventListener("change", () => { userEdited = true; });
   $("buttonSelect").addEventListener("change", () => { userEdited = true; });
+  $("knob2Select").addEventListener("change", () => { userEdited = true; });
   $("portSelect").addEventListener("change", async (e) => {
     if (!e.target.value) return;
     const r = await api("/api/connect", {
@@ -313,6 +321,7 @@ async function init() {
       body: JSON.stringify({
         knob: $("knobSelect").value,
         button: $("buttonSelect").value,
+        knob2: $("knob2Select").value,
       }),
     });
     showSave(r.ok ? text("saved") : translateMsg(r.error || ""), r.ok);

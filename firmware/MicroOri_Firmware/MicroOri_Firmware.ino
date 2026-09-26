@@ -1,24 +1,26 @@
 /*
- * MicroOri 控制器固件 (Arduino Pro Micro / Leonardo / ATmega32U4)
+ * MicroOri 3KEY v1.0.0 控制器固件 (Arduino Pro Micro / Leonardo / ATmega32U4)
  *
  * 接线:
  *   - D9  旋钮按钮 -> GND
  *   - D4  按钮    -> GND
+ *   - D5  新增旋钮按钮 -> GND
  *   - D6  LED1（任一按下点亮）
  *   - D14 LED2（仅 D4 按钮按下时点亮）
  *
  * 功能:
- *   - 两个按钮分别映射一个可配置按键
+ *   - 三个输入分别映射一个可配置按键
  *   - 上位机通过 USB 串口(CDC) 读取/修改映射，配置存 EEPROM 持久化
  *   - 支持 F1-F12、浏览器收藏、浏览器搜索、A-Z
  *   - 支持左右 Ctrl/Shift/Alt/Win，以及 KC_PWR 电源管理键(ACPI)
  *
  * 串口协议(115200, 换行结尾):
  *   PING            -> PONG
- *   GET             -> MAP knob <name> / MAP button <name> / OK
+ *   GET             -> MAP knob <name> / MAP button <name> / MAP knob2 <name> / OK
  *   SET knob <name> -> OK / ERR <msg>
  *   SET button <name> -> OK / ERR <msg>
- *   RESET           -> 恢复默认(F8/F9)
+ *   SET knob2 <name> -> OK / ERR <msg>
+ *   RESET           -> 恢复默认(F8/F9/F10)
  *
  * 需要 NicoHood 的 HID 库 (HID-Project)。
  */
@@ -42,24 +44,29 @@ enum KeyId : uint8_t {
 // ---------------- 引脚 ----------------
 const uint8_t PIN_KNOB = 9;     // 旋钮按钮 D9
 const uint8_t PIN_BUTTON = 4;   // 按钮 D4
+const uint8_t PIN_KNOB2 = 5;    // 新增旋钮按钮 D5
 const uint8_t LED_PIN = 6;      // D6
 const uint8_t LED_PIN2 = 14;    // D14
 const uint8_t RX_LED = 17;      // Pro Micro 板载 RX 灯
 
 // ---------------- EEPROM ----------------
-const uint8_t EE_MAGIC = 0x4D;
+const uint8_t EE_MAGIC = 0x5A;  // 3KEY 配置版本
 const uint16_t ADDR_MAGIC = 0;
 const uint16_t ADDR_KNOB = 1;
 const uint16_t ADDR_BUTTON = 2;
+const uint16_t ADDR_KNOB2 = 3;
 
 const KeyId DEFAULT_KNOB = K_F8;
 const KeyId DEFAULT_BUTTON = K_F9;
+const KeyId DEFAULT_KNOB2 = K_F10;
 
 // ---------------- 状态 ----------------
 KeyId knobKey = K_NONE;
 KeyId buttonKey = K_NONE;
+KeyId knob2Key = K_NONE;
 KeyId heldKnob = K_NONE;
 KeyId heldButton = K_NONE;
+KeyId heldKnob2 = K_NONE;
 bool announced = false;
 String serialLine = "";
 
@@ -177,20 +184,24 @@ void saveConfig() {
   EEPROM.write(ADDR_MAGIC, EE_MAGIC);
   EEPROM.write(ADDR_KNOB, (uint8_t)knobKey);
   EEPROM.write(ADDR_BUTTON, (uint8_t)buttonKey);
+  EEPROM.write(ADDR_KNOB2, (uint8_t)knob2Key);
 }
 
 void loadConfig() {
   if (EEPROM.read(ADDR_MAGIC) == EE_MAGIC) {
     knobKey = (KeyId)EEPROM.read(ADDR_KNOB);
     buttonKey = (KeyId)EEPROM.read(ADDR_BUTTON);
+    knob2Key = (KeyId)EEPROM.read(ADDR_KNOB2);
   } else {
     knobKey = DEFAULT_KNOB;
     buttonKey = DEFAULT_BUTTON;
+    knob2Key = DEFAULT_KNOB2;
     saveConfig();
   }
   // 防止损坏数据
   if (knobKey > K_PWR) knobKey = K_NONE;
   if (buttonKey > K_PWR) buttonKey = K_NONE;
+  if (knob2Key > K_PWR) knob2Key = K_NONE;
 }
 
 void sendMap() {
@@ -198,6 +209,8 @@ void sendMap() {
   Serial.println(keyName(knobKey));
   Serial.print(F("MAP button "));
   Serial.println(keyName(buttonKey));
+  Serial.print(F("MAP knob2 "));
+  Serial.println(keyName(knob2Key));
   Serial.println(F("OK"));
 }
 
@@ -226,8 +239,10 @@ void processCommand(const String& line) {
   if (line == "RESET") {
     knobKey = DEFAULT_KNOB;
     buttonKey = DEFAULT_BUTTON;
+    knob2Key = DEFAULT_KNOB2;
     if (heldKnob != K_NONE) { keyRelease(heldKnob); heldKnob = K_NONE; }
     if (heldButton != K_NONE) { keyRelease(heldButton); heldButton = K_NONE; }
+    if (heldKnob2 != K_NONE) { keyRelease(heldKnob2); heldKnob2 = K_NONE; }
     saveConfig();
     Serial.println(F("OK"));
     return;
@@ -253,6 +268,13 @@ void processCommand(const String& line) {
     if (target == "button") {
       if (heldButton != K_NONE) { keyRelease(heldButton); heldButton = K_NONE; }
       buttonKey = id;
+      saveConfig();
+      Serial.println(F("OK"));
+      return;
+    }
+    if (target == "knob2") {
+      if (heldKnob2 != K_NONE) { keyRelease(heldKnob2); heldKnob2 = K_NONE; }
+      knob2Key = id;
       saveConfig();
       Serial.println(F("OK"));
       return;
@@ -287,6 +309,7 @@ void handleSerial() {
 void setup() {
   pinMode(PIN_KNOB, INPUT_PULLUP);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
+  pinMode(PIN_KNOB2, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
   pinMode(LED_PIN2, OUTPUT);
   digitalWrite(LED_PIN, LOW);
@@ -310,9 +333,11 @@ void loop() {
 
   updateButton(PIN_KNOB, knobKey, heldKnob);
   updateButton(PIN_BUTTON, buttonKey, heldButton);
+  updateButton(PIN_KNOB2, knob2Key, heldKnob2);
 
   bool knobPressed = (digitalRead(PIN_KNOB) == LOW);
   bool buttonPressed = (digitalRead(PIN_BUTTON) == LOW);
-  digitalWrite(LED_PIN, knobPressed || buttonPressed ? HIGH : LOW);
+  bool knob2Pressed = (digitalRead(PIN_KNOB2) == LOW);
+  digitalWrite(LED_PIN, knobPressed || buttonPressed || knob2Pressed ? HIGH : LOW);
   digitalWrite(LED_PIN2, buttonPressed ? HIGH : LOW);
 }

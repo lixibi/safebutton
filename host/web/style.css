@@ -85,7 +85,7 @@ body {
 .lang-btn.active { background: var(--accent); color: #fff; }
 
 .layout {
-  max-width: 980px;
+  max-width: 1180px;
   margin: 24px auto;
   padding: 0 20px;
   display: grid;
@@ -152,7 +152,7 @@ select, input {
 
 .map-area {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -167,6 +167,7 @@ select, input {
   gap: 16px;
 }
 #buttonCard { border-top-color: var(--btn); }
+#knob2Card { border-top-color: var(--accent-2); }
 
 .map-head {
   display: flex;
@@ -183,6 +184,7 @@ select, input {
   padding: 4px 8px;
 }
 #buttonCard .map-pin { color: var(--btn); background: #fdeeeb; }
+#knob2Card .map-pin { color: var(--accent-2); background: #e6f7ef; }
 
 .key-select {
   width: 100%;
