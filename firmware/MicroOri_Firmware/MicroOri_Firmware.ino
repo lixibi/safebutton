@@ -1,18 +1,18 @@
 /*
- * MicroOri 3KEY v1.0.0 控制器固件 (Arduino Pro Micro / Leonardo / ATmega32U4)
+ * MicroOri 3KEY v1.1.0 控制器固件 (Arduino Pro Micro / Leonardo / ATmega32U4)
  *
  * 接线:
  *   - D9  旋钮按钮 -> GND
- *   - D4  按钮    -> GND
+ *   - D7  按钮    -> GND
  *   - D5  新增旋钮按钮 -> GND
  *   - D6  LED1（任一按下点亮）
- *   - D14 LED2（仅 D4 按钮按下时点亮）
+ *   - D14 LED2（仅 D7 按钮按下时点亮）
  *
  * 功能:
  *   - 三个输入分别映射一个可配置按键
  *   - 上位机通过 USB 串口(CDC) 读取/修改映射，配置存 EEPROM 持久化
  *   - 支持 F1-F12、浏览器收藏、浏览器搜索、A-Z
- *   - 支持左右 Ctrl/Shift/Alt/Win，以及 KC_PWR 电源管理键(ACPI)
+ *   - 支持左右 Ctrl/Shift/Alt/Win、DEL，以及 KC_PWR 电源管理键(ACPI)
  *
  * 串口协议(115200, 换行结尾):
  *   PING            -> PONG
@@ -38,12 +38,12 @@ enum KeyId : uint8_t {
   K_K, K_L, K_M, K_N, K_O, K_P, K_Q, K_R, K_S, K_T,
   K_U, K_V, K_W, K_X, K_Y, K_Z,
   K_LCTRL, K_RCTRL, K_LSHIFT, K_RSHIFT, K_LALT, K_RALT,
-  K_LWIN, K_RWIN, K_PWR
+  K_LWIN, K_RWIN, K_PWR, K_DEL
 };
 
 // ---------------- 引脚 ----------------
 const uint8_t PIN_KNOB = 9;     // 旋钮按钮 D9
-const uint8_t PIN_BUTTON = 4;   // 按钮 D4
+const uint8_t PIN_BUTTON = 7;   // 按钮 D7
 const uint8_t PIN_KNOB2 = 5;    // 新增旋钮按钮 D5
 const uint8_t LED_PIN = 6;      // D6
 const uint8_t LED_PIN2 = 14;    // D14
@@ -107,6 +107,7 @@ const char* keyName(KeyId id) {
   if (id == K_LWIN) return "LWIN";
   if (id == K_RWIN) return "RWIN";
   if (id == K_PWR) return "KC_PWR";
+  if (id == K_DEL) return "DEL";
   return "NONE";
 }
 
@@ -129,6 +130,7 @@ KeyId keyFromName(const String& name) {
   if (name == "LWIN" || name == "LEFT_WIN" || name == "LGUI") return K_LWIN;
   if (name == "RWIN" || name == "RIGHT_WIN" || name == "RGUI") return K_RWIN;
   if (name == "KC_PWR" || name == "POWER") return K_PWR;
+  if (name == "DEL" || name == "DELETE") return K_DEL;
   return K_NONE;
 }
 
@@ -153,6 +155,7 @@ bool keyPress(KeyId id) {
   if (id == K_LWIN) { Keyboard.press(KEY_LEFT_GUI); return true; }
   if (id == K_RWIN) { Keyboard.press(KEY_RIGHT_GUI); return true; }
   if (id == K_PWR) { System.press(SYSTEM_POWER_DOWN); return true; }
+  if (id == K_DEL) { Keyboard.press(KEY_DELETE); return true; }
   return false;
 }
 
@@ -176,6 +179,7 @@ bool keyRelease(KeyId id) {
   if (id == K_LWIN) { Keyboard.release(KEY_LEFT_GUI); return true; }
   if (id == K_RWIN) { Keyboard.release(KEY_RIGHT_GUI); return true; }
   if (id == K_PWR) { System.release(); return true; }
+  if (id == K_DEL) { Keyboard.release(KEY_DELETE); return true; }
   return false;
 }
 
@@ -199,9 +203,9 @@ void loadConfig() {
     saveConfig();
   }
   // 防止损坏数据
-  if (knobKey > K_PWR) knobKey = K_NONE;
-  if (buttonKey > K_PWR) buttonKey = K_NONE;
-  if (knob2Key > K_PWR) knob2Key = K_NONE;
+  if (knobKey > K_DEL) knobKey = K_NONE;
+  if (buttonKey > K_DEL) buttonKey = K_NONE;
+  if (knob2Key > K_DEL) knob2Key = K_NONE;
 }
 
 void sendMap() {

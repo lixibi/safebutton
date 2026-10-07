@@ -8,7 +8,7 @@ let lastMapping = { knob: "F8", button: "F9", knob2: "F10" };
 const STRINGS = {
   en: {
     brandTitle: "MicroOri Remapper",
-    brandSub: "3-Key v1.0.0 · D9 / D4 / D5 · Config saved to board",
+    brandSub: "3-Key v1.1.0 · D9 / D7 / D5 · Config saved to board",
     disconnected: "Disconnected",
     connect: "Connection",
     refresh: "Refresh",
@@ -30,13 +30,15 @@ const STRINGS = {
     connectedPort: (p) => `Connected · ${p}`,
     log: "Debug Log",
     browserGroup: "Browser",
+    editingGroup: "Editing",
     lettersGroup: "Letters A-Z",
     fav: "Browser Favorites",
     search: "Browser Search",
+    del: "Delete",
   },
   zh: {
     brandTitle: "MicroOri 改键上位机",
-    brandSub: "三键版 v1.0.0 · D9 / D4 / D5 · 配置直存板子",
+    brandSub: "三键版 v1.1.0 · D9 / D7 / D5 · 配置直存板子",
     disconnected: "未连接",
     connect: "连接",
     refresh: "刷新",
@@ -58,13 +60,15 @@ const STRINGS = {
     connectedPort: (p) => `已连接 · ${p}`,
     log: "调试日志",
     browserGroup: "浏览器",
+    editingGroup: "编辑键",
     lettersGroup: "字母 A-Z",
     fav: "浏览器收藏",
     search: "浏览器搜索",
+    del: "删除",
   },
   ja: {
     brandTitle: "MicroOri キー設定",
-    brandSub: "3キー版 v1.0.0 · D9 / D4 / D5 · 設定は基板に保存",
+    brandSub: "3キー版 v1.1.0 · D9 / D7 / D5 · 設定は基板に保存",
     disconnected: "未接続",
     connect: "接続",
     refresh: "更新",
@@ -86,9 +90,11 @@ const STRINGS = {
     connectedPort: (p) => `接続済み · ${p}`,
     log: "デバッグログ",
     browserGroup: "ブラウザ",
+    editingGroup: "編集キー",
     lettersGroup: "A-Z の文字",
     fav: "ブラウザお気に入り",
     search: "ブラウザ検索",
+    del: "Delete",
   },
 };
 
@@ -145,6 +151,7 @@ function groupLabel(g) {
   if (g === "浏览器") return text("browserGroup");
   if (g === "字母 A-Z") return text("lettersGroup");
   if (g === "Browser" || g === "浏览器") return text("browserGroup");
+  if (g === "Editing" || g === "编辑键" || g === "編集キー") return text("editingGroup");
   if (g === "Letters A-Z" || g === "A-Z の文字") return text("lettersGroup");
   return g;
 }
@@ -152,6 +159,7 @@ function groupLabel(g) {
 function optLabel(o) {
   if (o.value === "FAV") return text("fav");
   if (o.value === "SEARCH") return text("search");
+  if (o.value === "DEL") return text("del");
   return o.value;
 }
 

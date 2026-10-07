@@ -53,10 +53,10 @@ VERIFICATION_CONFIRMATION:
 
 -->
 
-# SafeButton Plus — MicroOri 3-Key v1.0.0
+# SafeButton Plus — MicroOri 3-Key v1.1.0
 
-The **MicroOri 3-Key v1.0.0** Windows host app (`MicroOri.exe`) manages three
-programmable inputs: the original knob on D9, the button on D4, and a new
+The **MicroOri 3-Key v1.1.0** Windows host app (`MicroOri.exe`) manages three
+programmable inputs: the original knob on D9, the button on D7, and a new
 second knob on D5. It reads the mappings stored on the controller and lets you
 change, save, or reset all three without the Arduino IDE.
 
@@ -70,7 +70,7 @@ change, save, or reset all three without the Arduino IDE.
 |---|------------|----------------|
 | 1 | Auto-connect | Connects to the last used COM port or detects the controller automatically. |
 | 2 | Read / save mapping | Reads the current three-key mapping from the controller and writes a new one over USB serial. |
-| 3 | Restore defaults | Resets both inputs to their original presets with one click. |
+| 3 | Restore defaults | Resets all three inputs to their original F8 / F9 / F10 presets with one click. |
 | 4 | Refresh / replug support | Refreshes the COM port list after unplugging and plugging the controller back in. |
 | 5 | Debug log | Shows live connection and serial traffic for simple troubleshooting. |
 | 6 | Built-in presets | F1-F12, browser keys, A-Z, left/right modifiers, and KC_PWR are available out of the box. |
@@ -130,7 +130,7 @@ Double-click `host/MicroOri.exe`. The single window opens directly and will:
 ### 2. Change and save a mapping
 
 1. Pick a key for **Knob 1 (D9)**.
-2. Pick a key for **Button (D4)**.
+2. Pick a key for **Button (D7)**.
 3. Pick a key for **Knob 2 (D5)**.
 4. Click **Save to Board**.
 
@@ -145,7 +145,20 @@ Available preset keys:
 | Browser | `FAV` (Browser Favorites), `SEARCH` (Browser Search) |
 | Letters | `A` … `Z` |
 | Modifiers | `LCTRL`, `RCTRL`, `LSHIFT`, `RSHIFT`, `LALT`, `RALT`, `LWIN`, `RWIN` |
+| Editing | `DEL` (Delete; `DELETE` is also accepted by the firmware) |
 | System | `KC_PWR` (Power Management / ACPI power key) |
+
+### Ctrl + Shift + Delete
+
+To configure the standard three-key shortcut, set the physical inputs by pin:
+
+| Pin | Mapping |
+|-----|---------|
+| `D9` | `LCTRL` |
+| `D5` | `LSHIFT` |
+| `D7` | `DEL` |
+
+Hold all three inputs at the same time. Windows receives `Ctrl + Shift + Delete`.
 
 ### 3. Switch language
 
@@ -165,20 +178,20 @@ the header. The choice is remembered between launches.
 | `SET knob2 <name>` | `OK` or `ERR <msg>` |
 | `RESET` | `OK` (restores defaults F8 / F9 / F10) |
 
-Names follow the same preset list: `F1`…`F12`, `FAV`, `SEARCH`, `A`…`Z`, modifier names, and `KC_PWR`.
+Names follow the same preset list: `F1`…`F12`, `FAV`, `SEARCH`, `A`…`Z`, modifier names, `DEL`, and `KC_PWR`.
 
 ## Wiring
 
 | Input | Pin connection |
 |-------|----------------|
 | Original knob | `D9` → `GND` |
-| Original button | `D4` → `GND` |
+| Original button | `D7` → `GND` |
 | New knob 2 | `D5` → `GND` |
 | LED 1 | `D6` → `GND` |
 | LED 2 | `D14` → `GND` |
 
 All three inputs use `INPUT_PULLUP`: connecting the pin to common ground means
-pressed. D6 lights for any of the three inputs; D14 continues to follow D4.
+pressed. D6 lights for any of the three inputs; D14 continues to follow D7.
 
 ---
 

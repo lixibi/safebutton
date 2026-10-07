@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	appVersion    = "3KEY-1.0.0"
+	appVersion    = "3KEY-1.1.0"
 	baud          = 115200
 	readTimeout   = 300 * time.Millisecond
 	handshakeTO   = 6 * time.Second
@@ -37,7 +37,7 @@ func init() {
 	}
 	validKeys["FAV"] = true
 	validKeys["SEARCH"] = true
-	for _, key := range []string{"LCTRL", "RCTRL", "LSHIFT", "RSHIFT", "LALT", "RALT", "LWIN", "RWIN", "KC_PWR"} {
+	for _, key := range []string{"LCTRL", "RCTRL", "LSHIFT", "RSHIFT", "LALT", "RALT", "LWIN", "RWIN", "DEL", "KC_PWR"} {
 		validKeys[key] = true
 	}
 	for c := 'A'; c <= 'Z'; c++ {
@@ -461,6 +461,7 @@ func main() {
 	for _, key := range modifierKeys {
 		keyOptions = append(keyOptions, map[string]string{"value": key.value, "label": key.label, "group": "Modifiers"})
 	}
+	keyOptions = append(keyOptions, map[string]string{"value": "DEL", "label": "Delete (DEL)", "group": "Editing"})
 	keyOptions = append(keyOptions, map[string]string{"value": "KC_PWR", "label": "Power Management (KC_PWR)", "group": "System"})
 	for c := 'A'; c <= 'Z'; c++ {
 		keyOptions = append(keyOptions, map[string]string{"value": string(c), "label": string(c), "group": "字母 A-Z"})
